@@ -64,6 +64,27 @@ def main():
             except Exception as e:
                 print(f"Failed to remove temporary file: {e}")
 
+with st.expander("📘 How to Use This App", expanded=False):
+        st.markdown("""
+        **Welcome to File Sharing App!** Here's how to use it:
+
+        ### 📤 Upload Files
+        1. Click 'Browse files' to select a file from your device
+        2. Enter upload URL in format: `folder_name/filename.ext`
+           - Example: `my_documents/report.pdf`
+        3. Click 'Upload File'
+        4. Wait for confirmation message
+
+        ### 📥 Download Files
+        1. Enter the exact folder name from Filebin
+        2. Click 'Search folder'
+        3. Click the download button that appears
+
+        ⚠️ **Important Notes:**
+        - Supported formats: TXT, PDF, JPG, PNG
+        - Files are temporary - download links may expire
+        - Folder names are case-sensitive
+        """)
 main()
 
 
