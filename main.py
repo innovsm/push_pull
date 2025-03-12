@@ -64,7 +64,6 @@ def main():
             except Exception as e:
                 print(f"Failed to remove temporary file: {e}")
 
-if __name__ == "__main__":
-    main()
+main()
 
 
