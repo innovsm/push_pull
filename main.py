@@ -1,5 +1,6 @@
 import streamlit as st
 import requests
+
 def create_download_button(url, filename):
     html = f"""
     <a href="{url}" download="{filename}" style="background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Download {filename}</a>
@@ -7,6 +8,7 @@ def create_download_button(url, filename):
     return html
 
 def upload_file_to_filebin(file_path, url):
+    print(url)
     try:
         with open(file_path, 'rb') as file:
             headers = {
@@ -31,48 +33,17 @@ def upload_file_to_filebin(file_path, url):
 
 def main():
     st.title("File Sharing")
-    get_zip = st.text_input("Search folder to download")
-    search_file = st.button("search folder")
-    if(search_file):
-        try:
-            st.text("https://filebin.net/archive/{}/zip".format(get_zip))
-            html = create_download_button("https://filebin.net/archive/{}/zip".format(get_zip),"")
-            st.markdown(html, unsafe_allow_html=True)
-        except:
-            st.error("Error occrured")
-    file = st.file_uploader("Choose a file", type=['txt', 'pdf', 'jpg', 'png'])
     
-    if file is not None:
-        file_path = "temp_file"
-        with open(file_path, 'wb') as f:
-            f.write(file.getbuffer())
-        
-        url = st.text_input("Enter the upload URL")
-        
-        if st.button("Upload File"):
-            response = upload_file_to_filebin(file_path, "https://filebin.net/{}/{}".format(url,file.name))
-            if response is not None:
-                st.write(f"Upload Status Code: {response.status_code}")
-                st.write("Response Body:", response.text)
-            else:
-                st.write("Upload failed. Check the logs for details.")
-            
-            # Clean up the temporary file
-            import os
-            try:
-                os.remove(file_path)
-            except Exception as e:
-                print(f"Failed to remove temporary file: {e}")
-
-with st.expander("📘 How to Use This App", expanded=False):
+    # Add expandable guide section
+    with st.expander("📘 How to Use This App", expanded=False):
         st.markdown("""
         **Welcome to File Sharing App!** Here's how to use it:
 
         ### 📤 Upload Files
-        1. Click 'Browse files' to select a file from your device
-        2. Enter upload URL in format: `folder_name/filename.ext`
-           - Example: `my_documents/report.pdf`
-        3. Click 'Upload File'
+        1. Click 'Browse files' to select one or more files from your device
+        2. Enter upload URL in format: `folder_name/`
+           - Example: `my_documents/`
+        3. Click 'Upload Files'
         4. Wait for confirmation message
 
         ### 📥 Download Files
@@ -85,6 +56,41 @@ with st.expander("📘 How to Use This App", expanded=False):
         - Files are temporary - download links may expire
         - Folder names are case-sensitive
         """)
-main()
 
+    get_zip = st.text_input("Search folder to download")
+    search_file = st.button("search folder")
+    if(search_file):
+        try:
+            st.text("https://filebin.net/archive/{}/zip".format(get_zip))
+            html = create_download_button("https://filebin.net/archive/{}/zip".format(get_zip),"")
+            st.markdown(html, unsafe_allow_html=True)
+        except:
+            st.error("Error occrured")
+
+    files = st.file_uploader("Choose one or more files", type=['txt', 'pdf', 'jpg', 'png'], accept_multiple_files=True)
+    
+    if files is not None:
+        url = st.text_input("Enter the upload URL (folder name only)")
+        
+        if st.button("Upload Files"):
+            for file in files:
+                file_path = f"temp_file_{file.name}"
+                with open(file_path, 'wb') as f:
+                    f.write(file.getbuffer())
+                
+                response = upload_file_to_filebin(file_path, f"https://filebin.net/{url}/{file.name}")
+                if response is not None:
+                    st.write(f"File {file.name} uploaded with status code: {response.status_code}")
+                    st.write("Response Body:", response.text)
+                else:
+                    st.write(f"Upload of {file.name} failed. Check the logs for details.")
+                
+                # Clean up the temporary file
+                import os
+                try:
+                    os.remove(file_path)
+                except Exception as e:
+                    print(f"Failed to remove temporary file: {e}")
+
+main()
 
